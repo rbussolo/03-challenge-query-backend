@@ -1,3 +1,4 @@
+import { Console } from 'node:console';
 import { getRepository, Repository } from 'typeorm';
 
 import { IFindUserWithGamesDTO, IFindUserByFullNameDTO } from '../../dtos';
@@ -14,17 +15,26 @@ export class UsersRepository implements IUsersRepository {
   async findUserWithGamesById({
     user_id,
   }: IFindUserWithGamesDTO): Promise<User> {
-    // Complete usando ORM
+    const user = this.repository.findOneOrFail({ 
+      relations: ["games"],
+      where: [{ id: user_id }]
+    });
+
+    return user;
   }
 
   async findAllUsersOrderedByFirstName(): Promise<User[]> {
-    return this.repository.query(); // Complete usando raw query
+    const query = "select * from users order by first_name";
+
+    return this.repository.query(query); // Complete usando raw query
   }
 
   async findUserByFullName({
     first_name,
     last_name,
   }: IFindUserByFullNameDTO): Promise<User[] | undefined> {
-    return this.repository.query(); // Complete usando raw query
+    const query = `select * from users where lower(first_name) like '${first_name.toLowerCase()}' and lower(last_name) like '${last_name.toLowerCase()}'`;
+    
+    return this.repository.query(query); // Complete usando raw query
   }
 }
